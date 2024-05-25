@@ -11,7 +11,8 @@ class UpdatePost extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $post = $this->route('post');
+        return $post && $this->user()->id == $post->user_id;
     }
 
     /**
@@ -22,9 +23,9 @@ class UpdatePost extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'sometimes|string|max:225',
-            'body' => 'sometimes|string|max:6000',
-            'category_id' => 'sometimes|exists:categories,id',
+            'title' => 'required|string|max:225',
+            'body' => 'required|string|max:6000',
+            'category_id' => 'required|required|exists:categories,id',
         ];
     }
 }
