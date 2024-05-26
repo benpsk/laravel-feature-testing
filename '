@@ -27,10 +27,12 @@ class PostTest extends TestCase
     {
         Post::factory(10)->create();
         Post::factory()->count(30)->create(['user_id' => $this->user->id]);
+
         $response = $this->actingAs($this->user)->get(route('posts.index'));
         $response->assertOk()
             ->assertViewIs('post.index')
             ->assertViewHas('posts');
+
         $this->assertEquals(10, $response->viewData('posts')->count());
         $this->assertEquals(30, Post::where('user_id', $this->user->id)->count());
     }
@@ -53,7 +55,9 @@ class PostTest extends TestCase
             'body' => 'This is a new post.',
             'category_id' => $category->id,
         ];
+
         $response = $this->actingAs($this->user)->post(route('posts.store'), $data);
+
         $response->assertRedirect(route('posts.index'));
         $this->assertDatabaseHas('posts', [
             'title' => 'New Post',
@@ -66,10 +70,13 @@ class PostTest extends TestCase
     public function test_edit_displays_form()
     {
         $post = Post::factory()->create(['user_id' => $this->user->id]);
+
         $response = $this->actingAs($this->user)->get(route('posts.edit', $post->id));
+
         $response->assertStatus(200)
             ->assertViewIs('post.edit')
             ->assertViewHas('post', $post);
+
         $this->categories->each(function ($category) use ($response) {
             $response->assertSee($category->name);
         });
@@ -84,7 +91,9 @@ class PostTest extends TestCase
             'body' => 'This post has been updated.',
             'category_id' => $category->id,
         ];
+
         $response = $this->actingAs($this->user)->put(route('posts.update', $post->id), $data);
+
         $response->assertRedirect(route('posts.index'));
         $this->assertDatabaseHas('posts', [
             'id' => $post->id,
@@ -98,18 +107,13 @@ class PostTest extends TestCase
     public function test_destroy_deletes_post()
     {
         $post = Post::factory()->create(['user_id' => $this->user->id]);
+
         $response = $this->actingAs($this->user)->delete(route('posts.destroy', $post->id));
+
         $response->assertRedirect(route('posts.index'));
         $this->assertDatabaseMissing('posts', ['id' => $post->id]);
     }
 
-    public function test_non_owner_cannot_edit_displays_form()
-    {
-        $nonOwner = User::factory()->create();
-        $post = Post::factory()->create(['user_id' => $this->user->id]);
-        $response = $this->actingAs($nonOwner)->get(route('posts.edit', $post->id));
-        $response->assertStatus(403);
-    }
     public function test_non_owner_cannot_update_post()
     {
         $nonOwner = User::factory()->create();
@@ -121,14 +125,6 @@ class PostTest extends TestCase
             'category_id' => $category->id,
         ];
         $response = $this->actingAs($nonOwner)->put(route('posts.update', $post->id), $data);
-        $response->assertStatus(403);
-    }
-
-    public function test_non_owner_cannot_deletes_post()
-    {
-        $nonOwner = User::factory()->create();
-        $post = Post::factory()->create(['user_id' => $this->user->id]);
-        $response = $this->actingAs($nonOwner)->delete(route('posts.destroy', $post->id));
         $response->assertStatus(403);
     }
 

@@ -45,6 +45,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        abort_if(request()->user()->cannot('edit', $post), 403);
         return view('post.edit', compact('post'));
     }
 
@@ -53,6 +54,7 @@ class PostController extends Controller
      */
     public function update(UpdatePost $request, Post $post)
     {
+        abort_if($request->user()->cannot('update', $post), 403);
         $input = $request->validated();
         $input['user_id'] = $request->user()->id;
         $post->update($input);
@@ -64,6 +66,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        abort_if(request()->user()->cannot('delete', $post), 403);
         $post->delete();
         return to_route('posts.index')->with('success', 'Post delete successfully!');
     }
