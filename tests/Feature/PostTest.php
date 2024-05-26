@@ -45,7 +45,7 @@ class PostTest extends TestCase
         });
     }
 
-    public function test_store_saves_new_post()
+    public function test_store_new_post()
     {
         $category = $this->categories->first();
         $data = [
@@ -54,7 +54,8 @@ class PostTest extends TestCase
             'category_id' => $category->id,
         ];
         $response = $this->actingAs($this->user)->post(route('posts.store'), $data);
-        $response->assertRedirect(route('posts.index'));
+        $response->assertRedirect(route('posts.index'))
+            ->assertSessionHas('success');
         $this->assertDatabaseHas('posts', [
             'title' => 'New Post',
             'body' => 'This is a new post.',
@@ -75,7 +76,7 @@ class PostTest extends TestCase
         });
     }
 
-    public function test_update_changes_post_data()
+    public function test_update_post_data()
     {
         $post = Post::factory()->create(['user_id' => $this->user->id]);
         $category = $this->categories->last();
@@ -85,7 +86,8 @@ class PostTest extends TestCase
             'category_id' => $category->id,
         ];
         $response = $this->actingAs($this->user)->put(route('posts.update', $post->id), $data);
-        $response->assertRedirect(route('posts.index'));
+        $response->assertRedirect(route('posts.index'))
+            ->assertSessionHas('success');
         $this->assertDatabaseHas('posts', [
             'id' => $post->id,
             'title' => 'Updated Post',
@@ -95,7 +97,7 @@ class PostTest extends TestCase
         ]);
     }
 
-    public function test_destroy_deletes_post()
+    public function test_destroy_post()
     {
         $post = Post::factory()->create(['user_id' => $this->user->id]);
         $response = $this->actingAs($this->user)->delete(route('posts.destroy', $post->id));
@@ -103,7 +105,7 @@ class PostTest extends TestCase
         $this->assertDatabaseMissing('posts', ['id' => $post->id]);
     }
 
-    public function test_non_owner_cannot_edit_displays_form()
+    public function test_non_owner_cannot_edit_post_form()
     {
         $nonOwner = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $this->user->id]);
@@ -124,7 +126,7 @@ class PostTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_non_owner_cannot_deletes_post()
+    public function test_non_owner_cannot_destroy_post()
     {
         $nonOwner = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $this->user->id]);

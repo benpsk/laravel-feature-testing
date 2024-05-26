@@ -21,7 +21,15 @@
                         <div class="grid gap-8 sm:grid-cols-2 sm:gap-12 lg:grid-cols-2 xl:grid-cols-2 xl:gap-16 mb-16">
                             @foreach($posts as $post)
                             <x-post.card :post="$post">
-                                <div class="flex justify-end items-center">
+                                <div class="flex justify-between items-center">
+                                    <form method="post" action="{{ route('posts.destroy', $post->id) }}">
+                                        @csrf
+                                        @method('delete')
+
+                                        <button class="font-semibold text-red-500 transition duration-100 hover:text-red-600 active:text-red-700">
+                                            Delete
+                                        </button>
+                                    </form>
                                     <a href="{{ route('posts.edit', $post->id)}}" class="font-semibold text-indigo-500 transition duration-100 hover:text-indigo-600 active:text-indigo-700">Edit</a>
                                 </div>
                             </x-post.card>

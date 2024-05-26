@@ -59,7 +59,7 @@
                                 <x-post.card :post="$post">
                                     <div class="flex justify-between items-center">
                                         <p class="text-black">Author: {{ $post->user->name }}</p>
-                                        <a href="#" class="font-semibold text-indigo-500 transition duration-100 hover:text-indigo-600 active:text-indigo-700">Read more</a>
+                                        <a href="##" class="font-semibold text-indigo-500 transition duration-100 hover:text-indigo-600 active:text-indigo-700">Read more</a>
                                     </div>
                                 </x-post.card>
                                 @endforeach
