@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -20,7 +21,8 @@ class PostTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->create();
-        $this->categories = Category::factory()->count(3)->create();
+        $this->seed(CategorySeeder::class);
+        $this->categories = Category::all();
     }
 
     public function test_index_displays_posts()
@@ -32,7 +34,7 @@ class PostTest extends TestCase
             ->assertViewIs('post.index')
             ->assertViewHas('posts');
         $this->assertEquals(10, $response->viewData('posts')->count());
-        $this->assertEquals(30, Post::where('user_id', $this->user->id)->count());
+        $this->assertEquals(30, $response->viewData('posts')->total());
     }
 
     public function test_create_displays_form()
@@ -68,7 +70,7 @@ class PostTest extends TestCase
     {
         $post = Post::factory()->create(['user_id' => $this->user->id]);
         $response = $this->actingAs($this->user)->get(route('posts.edit', $post->id));
-        $response->assertStatus(200)
+        $response->assertOk()
             ->assertViewIs('post.edit')
             ->assertViewHas('post', $post);
         $this->categories->each(function ($category) use ($response) {
@@ -168,6 +170,10 @@ class PostTest extends TestCase
             [
                 ['title' => 'Valid title', 'body' => 'Valid body', 'category_id' => 999],
                 ['category_id'],
+            ],
+            [
+                ['title' => '', 'body' => '', 'category_id' => 999],
+                ['title', 'body', 'category_id'],
             ],
         ];
     }
